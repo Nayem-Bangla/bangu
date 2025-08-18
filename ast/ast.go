@@ -134,3 +134,64 @@ func (es *ExpressionStatement) String() string {
 func (i *Identifier) String() string {
 	return i.Value
 }
+
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64
+}
+
+func (il *IntegerLiteral) expressionNode() {}
+
+func (il *IntegerLiteral) TokenLiteral() string {
+	return il.Token.Literal
+}
+
+func (il *IntegerLiteral) String() string {
+	return il.Token.Literal
+}
+
+type PrefixExpression struct {
+	Token    token.Token // The prefix token, e.g., '!' or '-'.
+	Operator string      // The operator, e.g., '!' or '-'.
+	Right    Expression  // The expression that follows the operator.
+}
+
+// expressionNode is a marker method to distinguish PrefixExpression as an expression.
+func (pe *PrefixExpression) expressionNode() {}
+
+// TokenLiteral returns the literal value of the token associated with the PrefixExpression node.
+func (pe *PrefixExpression) TokenLiteral() string {
+	return pe.Token.Literal
+}
+
+// String returns a string representation of the PrefixExpression node.
+func (pe *PrefixExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(pe.Operator)
+	out.WriteString(pe.Right.String())
+	out.WriteString(")")
+	return out.String()
+}
+
+type InfixExpression struct {
+	Token    token.Token // The infix token, e.g., '+', '-', '*', '/'.
+	Left     Expression  // The left-hand side expression.
+	Operator string      // The operator, e.g., '+', '-', '*', '/'.
+	Right    Expression  // The right-hand side expression.
+}
+
+// expressionNode is a marker method to distinguish InfixExpression as an expression.
+func (oe *InfixExpression) expressionNode() {}
+func (oe *InfixExpression) TokenLiteral() string {
+	return oe.Token.Literal
+}
+func (oe *InfixExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(oe.Left.String())
+	out.WriteString(" " + oe.Operator + " ")
+	out.WriteString(oe.Right.String())
+	out.WriteString(")")
+	return out.String()
+}
