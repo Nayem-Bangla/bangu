@@ -3,6 +3,7 @@ package ast
 import (
 	"bangu/token"
 	"bytes"
+	"strings"
 )
 
 type Node interface { // TokenLiteral returns the literal value of the token associated with the node.
@@ -193,5 +194,142 @@ func (oe *InfixExpression) String() string {
 	out.WriteString(" " + oe.Operator + " ")
 	out.WriteString(oe.Right.String())
 	out.WriteString(")")
+	return out.String()
+}
+
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+// expressionNode is a marker method to distinguish Boolean as an expression.
+func (b *Boolean) expressionNode() {}
+
+// TokenLiteral returns the literal value of the token associated with the Boolean node.
+func (b *Boolean) TokenLiteral() string {
+	return b.Token.Literal
+}
+
+// String returns a string representation of the Boolean node.
+func (b *Boolean) String() string {
+	return b.Token.Literal
+}
+
+type IfExpression struct {
+	Token       token.Token     // The 'if' token.
+	Condition   Expression      // The condition expression.
+	Consequence *BlockStatement // The block of statements to execute if the condition is true.
+	Alternative *BlockStatement // The block of statements to execute if the condition is false (optional).
+}
+
+// expressionNode is a marker method to distinguish IfExpression as an expression.
+func (ie *IfExpression) expressionNode() {}
+
+// TokenLiteral returns the literal value of the token associated with the IfExpression node.
+func (ie *IfExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}
+
+// String returns a string representation of the IfExpression node.
+func (ie *IfExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("if ")
+	out.WriteString(ie.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(ie.Consequence.String())
+
+	if ie.Alternative != nil {
+		out.WriteString(" else ")
+		out.WriteString(ie.Alternative.String())
+	}
+
+	return out.String()
+}
+
+type BlockStatement struct {
+	Token      token.Token // The '{' token.
+	Statements []Statement // The statements in the block.
+}
+
+// statementNode is a marker method to distinguish BlockStatement as a statement.
+func (bs *BlockStatement) statementNode() {}
+
+// TokenLiteral returns the literal value of the token associated with the BlockStatement node.
+func (bs *BlockStatement) TokenLiteral() string {
+	return bs.Token.Literal
+}
+
+// String returns a string representation of the BlockStatement node.
+func (bs *BlockStatement) String() string {
+	var out bytes.Buffer
+
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
+}
+
+type FunctionLiteral struct {
+	Token      token.Token     // The 'fn' token.
+	Parameters []*Identifier   // The parameters of the function.
+	Body       *BlockStatement // The body of the function.
+}
+
+// expressionNode is a marker method to distinguish FunctionLiteral as an expression.
+func (fl *FunctionLiteral) expressionNode() {}
+
+// TokenLiteral returns the literal value of the token associated with the FunctionLiteral node.
+func (fl *FunctionLiteral) TokenLiteral() string {
+	return fl.Token.Literal
+}
+
+// String returns a string representation of the FunctionLiteral node.
+func (fl *FunctionLiteral) String() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, p := range fl.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString(fl.TokenLiteral())
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") ")
+
+	out.WriteString(fl.Body.String())
+
+	return out.String()
+}
+
+type CallExpression struct {
+	Token     token.Token  // The '(' token.
+	Function  Expression   // The function being called.
+	Arguments []Expression // The arguments passed to the function.
+}
+
+// expressionNode is a marker method to distinguish CallExpression as an expression.
+func (ce *CallExpression) expressionNode() {}
+
+// TokenLiteral returns the literal value of the token associated with the CallExpression node.
+func (ce *CallExpression) TokenLiteral() string {
+	return ce.Token.Literal
+}
+
+// String returns a string representation of the CallExpression node.
+func (ce *CallExpression) String() string {
+	var out bytes.Buffer
+
+	args := []string{}
+	for _, a := range ce.Arguments {
+		args = append(args, a.String())
+	}
+
+	out.WriteString(ce.Function.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+
 	return out.String()
 }
