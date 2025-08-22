@@ -23,7 +23,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: n.Value}
 	case *ast.Boolean:
-		return nativeBoolToBoolleanObject(n.Value)
+		return nativeBoolToBooleanObject(n.Value)
 	case *ast.PrefixExpression:
 		right := Eval(n.Right, env)
 		if isError(right) {
@@ -56,9 +56,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return val
 		}
 		env.Set(n.Name.Value, val)
-		return val
+		return NULL
 	case *ast.Identifier:
 		return evalIdentifier(n, env)
+
 	case *ast.FunctionLiteral:
 		params := n.Parameters
 		body := n.Body
@@ -77,7 +78,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	}
 
-	return nil
+	return NULL
 }
 
 func evalProgram(program *ast.Program, env *object.Environment) object.Object {
@@ -112,7 +113,7 @@ func evalStatements(stmts []ast.Statement) object.Object {
 }
 */
 
-func nativeBoolToBoolleanObject(input bool) *object.Boolean {
+func nativeBoolToBooleanObject(input bool) *object.Boolean {
 	if input {
 		return TRUE
 	}
@@ -158,9 +159,9 @@ func evalInfixExpression(
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
 	case operator == "==":
-		return nativeBoolToBoolleanObject(left == right)
+		return nativeBoolToBooleanObject(left == right)
 	case operator == "!=":
-		return nativeBoolToBoolleanObject(left != right)
+		return nativeBoolToBooleanObject(left != right)
 	case left.Type() != right.Type():
 		return newError("type mismatch: %s %s %s",
 			left.Type(), operator, right.Type())
@@ -185,13 +186,13 @@ func evalIntegerInfixExpression(
 	case "/":
 		return &object.Integer{Value: leftVal / rightVal}
 	case "<":
-		return nativeBoolToBoolleanObject(leftVal < rightVal)
+		return nativeBoolToBooleanObject(leftVal < rightVal)
 	case ">":
-		return nativeBoolToBoolleanObject(leftVal > rightVal)
+		return nativeBoolToBooleanObject(leftVal > rightVal)
 	case "==":
-		return nativeBoolToBoolleanObject(leftVal == rightVal)
+		return nativeBoolToBooleanObject(leftVal == rightVal)
 	case "!=":
-		return nativeBoolToBoolleanObject(leftVal != rightVal)
+		return nativeBoolToBooleanObject(leftVal != rightVal)
 	default:
 		return newError("unknown operator: %s %s %s",
 			left.Type(), operator, right.Type())
