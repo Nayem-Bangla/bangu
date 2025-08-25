@@ -1,0 +1,36 @@
+# Binaries for programs and tests
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Build directories
+bin/
+build/
+dist/
+coverage/
+
+# Dependency management (optional vendoring)
+vendor/
+
+# Editor/IDE configs
+.idea/
+.vscode/
+*.code-workspace
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs and coverage
+*.log
+coverage.out
+profile.out
+
+# Local env
+.env
+.env.*
+
