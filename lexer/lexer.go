@@ -74,14 +74,24 @@ func (l *Lexer) NextToken() token.Token {
 	case '"':
 		tok.Type = token.STRING
 		tok.Literal = l.readString()
+		if tok.Literal == "" {
+			tok.Type = token.ILLEGAL
+			tok.Literal = "unterminated string"
+		}
+		return tok
 
 	case '[':
 		tok = newToken(token.LBRACKET, l.ch)
 	case ']':
 		tok = newToken(token.RBRACKET, l.ch)
+
+	case ':':
+		tok = newToken(token.COLON, l.ch)
+
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
+		return tok
 	default:
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
@@ -118,14 +128,14 @@ func isLetter(ch byte) bool {
 
 func (l *Lexer) readNumber() string {
 	position := l.position
-	for isDigital(l.ch) {
+	for isDigital(l.ch) || l.ch == '.' {
 		l.readChar()
 	}
 	return l.input[position:l.position]
 }
 
 func isDigital(ch byte) bool {
-	return '0' <= ch && ch <= '9'
+	return '0' <= ch && ch <= '9' || ch == '.'
 }
 
 func (l *Lexer) skipWhitespace() {
@@ -146,8 +156,17 @@ func (l *Lexer) readString() string {
 	position := l.position + 1
 	for {
 		l.readChar()
-		if l.ch == '"' || l.ch == 0 {
-			break
+		if l.ch == 0 {
+			return ""
+		}
+		if l.ch == '\\' {
+			l.readChar()
+			continue
+		}
+		if l.ch == '"' {
+			str := l.input[position:l.position]
+			l.readChar() // Consume the closing quote
+			return str
 		}
 	}
 	return l.input[position:l.position]
